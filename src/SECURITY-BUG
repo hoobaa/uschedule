@@ -1,0 +1,33 @@
+uscheduleconf may have created a security problem in versions below 0.7.0, 
+when it was called with a minus sign instead of the log user name.
+
+In this case multilog runs as root, though the user may replace multilog
+by any other program.
+
+******************************************************************************
+****           Impact: a local user may have got root rights.             ****
+******************************************************************************
+
+uscheduleconf has been fixed and simplified in version 0.7.0, but there
+is no way to automatically upgrade already created configuration.
+
+To fix the configurations:
+  See through /service/*uschedule*/log/run and also all other places where
+  uscheduled is called and and add 
+
+    setuidgid "username" \
+
+  after the line containing the softlimit call and before the line 
+  containing run, but only if there is not already a call to setuidgid. 
+  Afterwards the file should look like this:
+
+    #! /bin/sh
+    exec 2>&1
+    cd '...SOMEWHERE...' || exit 1
+    exec \
+    softlimit -m 8000000 -o 400 -p 40 \
+    setuidgid USERNAME \
+    ./run
+
+The .uschedule/log/run files look similar, but must not contain a 
+setuidgid call.

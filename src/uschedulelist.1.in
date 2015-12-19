@@ -1,0 +1,40 @@
+.TH uschedulelist 1 \*(VE \*(PA      
+.hy 0
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The uschedule package" ../uschedule.html
+.paragraph
+.SH NAME
+uschedulelist - list uschedule jobs
+.LINE
+.section SYNOPSIS
+\fBuschedulelist\fR [-.] [-d DIR] [-c ID] [-s] [-S] [JOB-ID ...]
+.section DESCRIPTION
+\fBuschedulelist\fR reads information about scheduled jobs 
+from \fIDIR\fR, or, if this is not given, from \fI~/.uschedule/\fR.
+The current working directory will be used instead of \fI~\fR if the 
+\fI-.\fR or \fI--dot-as-home\fR option is given.
+.paragraph
+It sorts the jobs by time and ID, and prints a few lines of information
+about every job or the jobs with the identifiers \fIJOB-ID\fR ...
+.paragraph
+If the \fI-c\fR (\fI--commands\fR) option is used the command will not list scheduled
+jobs but registered commands.
+.paragraph
+The \fI-s\fR (\fI--short\fR) option makes \fBuschedulelist\fR print 
+less information.
+.paragraph
+The \fI-S\fR (\fI--show-command\fR) option makes \fBuschedulelist\fR list 
+the full command in addition to the listing output. This may be 
+useful to distinguish between multiple similary named commands.
+.section AUTHOR
+Uwe Ohse, uwe@ohse.de
+.section "SEE ALSO"
+.manlink uschedule.html uschedule(8) ,
+.manlink intro.html uschedule_intro(7) .
+.HTML <!--
+.paragraph
+The homepage may be more up-to-date, see
+.br
+http://www.ohse.de/uwe/uschedule.html.
+.HTML -->

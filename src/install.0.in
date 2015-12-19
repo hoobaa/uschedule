@@ -1,0 +1,88 @@
+.TH uscheduleinstall 8 \*(VE \*(PA
+.nh
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The \*(PA package" ../uschedule.html
+.paragraph
+.section "How to install uschedule"
+.paragraph
+This document describes how to download, compile, test and install uschedule.
+.LINE
+.subsection "System requirements:"
+The uschedule package is meant to run under UNIX and -lookalikes.
+.paragraph
+You'll need the daemontools package by Daniel J. Bernstein to run 
+uschedule, see
+.extlink http://cr.yp.to/daemontools.html "the daemontools home page" 
+for a description and installation instructions.
+.paragraph
+.LINE
+.subsection "Downloading uschedule:"
+The latest published uschedule package is:
+.paragraph
+.extlink http://www.ohse.de/uwe/\*(PA/\*(PA-\*(VE.tar.gz \*(PA-\*(VE.tar.gz
+.paragraph
+You can alternatively download it through FTP:
+.paragraph
+.extlink ftp://www.ohse.de/uwe/\*(PA/\*(PA-\*(VE.tar.gz \*(PA-\*(VE.tar.gz
+.paragraph
+Move the downloaded file to /package.
+.LINE
+.subsection "Unpack the package:"
+.nf
+.HTML <pre>
+  # the next command is optional: If you do not use /package,
+  # you may unpack \*(PA anywhere.
+  $ cd /package
+  $ gunzip \*(PA-\*(VE.tar.gz 
+  $ tar -xpf \*(PA-\*(VE.tar
+  $ rm \*(PA-\*(VE.tar
+  $ cd \*(CL/\*(PA-\*(VE
+.br
+.HTML </pre>
+.fi
+.LINE
+.subsection "Compile and install the programs, using /package:"
+.nf
+.HTML <pre>
+  $ package/install
+.HTML </pre>
+.fi
+The self check is run as part of this and may take some time. 
+Things are fine if the test does not print anything, but any output is a sign 
+of a problem.
+.paragraph
+.LINE
+.subsection "Compile and install the programs under /usr/local:"
+.nf
+.HTML <pre>
+  $ make DEST=/usr/local oldinstall
+.HTML </pre>
+.paragraph
+.fi
+The self check is run as part of this and may take some time. 
+Things are fine if the test does not print anything, but any output is a sign 
+of a problem.
+.LINE
+.subsection "How to report success: (not mandatory)"
+.nf
+.HTML <pre>
+  $ cat src/auto-systype
+  $ mail uwe-generic-counter@ohse.de <src/auto-systype
+.HTML </pre>
+.fi
+.paragraph
+Please do not send a success email unless the checks were successful.
+.subsection "Mailing list:"
+To subscribe to the uschedule mailing list send a mail to
+\fBuschedule-subscribe@lists.ohse.de\fR. The content is ignored.
+.LINE
+.subsection "How to use uschedule:"
+The
+.manlink intro.html uschedule_intro(7) 
+manual describes how to use uschedule. 
+.section "SEE ALSO"
+.nf
+The homepage may be more up-to-date, see
+.extlink http://www.ohse.de/uwe/uschedule.html "the uschedule home page" .
+.fi

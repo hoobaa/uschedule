@@ -1,0 +1,238 @@
+.TH uschedule 1 \*(VE \*(PA      
+.hy 0
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The uschedule package" ../uschedule.html
+.paragraph
+.SH NAME
+uschedule - uschedule a job
+.LINE
+.section SYNOPSIS
+\fBuschedule\fR [OPTIONS] ID TIMESPEC [...]
+.section DESCRIPTION
+\fBuschedule\fR schedules the command with the identifier \fIID\fR 
+to be executed at the time specified by \fITIMESPEC\fR. Multiple
+\fITIMESPEC\fR arguments are allowed.
+.paragraph
+\fIID\fR is the identifier of a command previously registered
+with
+.manlink uschedulecmd.html uschedulecmd(1) .
+.section OPTIONS
+.options
+.option "-., --dot-as-home"
+The current working directory will be used instead of $HOME.
+.option "-1, --null1"
+Redirect the standard output of the job to /dev/null. The default is to
+write it into the log file of the 
+.manlink uscheduled.html uscheduled(8)
+daemon.
+.option "-2, --null2"
+Redirect the standard error output of the job to /dev/null. The same
+default applies.
+.option "-c, --count=NNN"
+Repeat the command up to \fINNN\fR times. A value of \fI1\fR means the
+the job will run once, \fI0\fR is a synonym for \fIforever\fR, which
+is the default.
+.option "-d, --dir=DIR"
+Put the new job into \fIDIR\fR. The default is \fI~/.uschedule/\fR.
+.option "-D, --description=DESC"
+Give the new job the description \fIDESC\fR. The description is used
+for the user interface commands 
+.manlink uschedulelist.html uschedulelist(1)
+and
+.manlink uschedulerm.html uschedulerm(1)
+only.  Descriptions must not be longer than 70 characters and must
+not contain colons.
+.option "-e, --every=NUMBER[mhdw]"
+Repeat every \fINUMBER\fR time units (default: seconds).
+
+This option is implemented in such a way that the NUMBER is added once 
+at the start of a search. Then all other restrictions (late, from, to, 
+TIMESPEC) will be applied and the next matching time will be searched 
+for. In other words: The start time to be searched from is changed from
+\fBnow\fR to \fBnow + NUMBER\fR.
+
+A \fIm\fR (\fIh\fR, \fId\fR or \fIw\fR) appended to \fINUMBER\fR changes 
+the time unit from seconds to minutes (hours, days or weeks).
+.option "-f, --from=TIMESPEC"
+Jobs will only be started if \fITIMESPEC\fR has matched. This
+together with the \fI--to\fR option allows to further restrict the
+times a job will be started. This example starts a job JOBID every day
+a few seconds after midnight, but only after the first of april, 2004,
+has been reached:
+.paragraph
+.nf
+.HTML <pre>
+   uschedule --from "2003-4-1 00:00:00" JOBID '*-*-* 00:00:10'
+.HTML </pre>
+.fi
+.optionparagraph
+TIMESPEC should be simple. Wild cards are only allowed at the start,
+\fInot\fR after any fixed number. \fI2002-*-1 00:00:00\fR is forbidden,
+\fI*-*-* *:00:00\fR is OK.
+.optionparagraph
+Weekday names may be used, too, though the result is likely to be 
+non-intuitive. Better avoid them.
+.optionparagraph
+This option was added in version 0.6.0.
+.option "-l, --late=SECONDS"
+Allow the job to be executed up to \fISECONDS\fR late. This is useful
+if the machine or the 
+.manlink uscheduled.html uscheduled(8)
+daemon was down during the time the job should have run.
+.optionparagraph
+The default is 3600 seconds (one hour).
+.option "-t, --to=TIMESPEC"
+Jobs will only be started if \fITIMESPEC\fR has not been reached. This
+together with the \fI--from\fR option allows to further restrict the
+times a job will be started. The example below starts a job every day
+a few seconds after midnight, but only up to 30th of march, 2004:
+.paragraph
+.nf
+.HTML <pre>
+   uschedule --to "2003-4-1 00:00:00" jobid '*-*-* 00:00:10'
+.HTML </pre>
+.fi
+.optionparagraph
+TIMESPEC should be simple. Wild cards are only allowed at the start,
+\fInot\fR after any fixed number. \fI2002-*-1 00:00:00\fR is forbidden,
+\fI*-*-* *:00:00\fR is OK.
+If wild cards are used, the --from option has to be used, to.
+.optionparagraph
+Weekday names may be used, too, though the result is likely to be 
+non-intuitive. Better avoid them.
+.optionparagraph
+This option was added in version 0.6.0.
+.section "TIMESPEC"
+A time specification consists of two or three words. The first, optional,
+words specifies a day-of-week, the next the year, month and day-of-month,
+and the last word specifies hour, minute and seconds.
+.br
+Words are separated by exactly one space.
+.subsection "Day Of Week"
+The day of the week is given as a comma separated list of weekday
+names or three letter abbreviations thereof. Names are case insensitive.
+The default is to run the job at any day of the week.
+.paragraph
+\fISunday,Wed\fR is a valid list. \fIMonday, Tues\fI isn't.
+.subsection "Date"
+The date consists of three parts: Year, month and day. Two parts are separated
+by a single dash. Each part is a numerical value as described below.
+.subsection "Time"
+The time consists of three parts, too. Hour, minute and second are
+by a single colon. Each part is a numerical value as described below.
+.subsection "Number Specification"
+Whenever is number is allowed in a job execution time specification
+is may be either a single value, a single star ("*", meaning "all
+possible values") or a comma 
+separated list of values.
+.br
+A value may be a number or a number ("a") followed by a slash 
+followed by a number ("b"), meaning "execute at 'a+b*n'", where
+"n" is a positive integer including 0). You may use a plus sign
+instead of the slash ('a+b').
+.br
+Note that 30/10 (oder 30+10) and such things are understood quite literally,
+meaning "30, 40, 50" and not "0, 10, 20, 30, 40, 50".
+
+.subsection "Examples"
+The following schedules a job to be run at midnight of each seventh
+of the month:
+.nf
+.HTML <pre>
+   *-*-7 00:00:00
+.HTML </pre>
+.fi
+.paragraph
+To run a job on every monday in december at 12:00:00:
+.paragraph
+.nf
+.HTML <pre>
+   Monday *-12-* 12:00:00
+.HTML </pre>
+.fi
+.paragraph
+To run a job 30 minutes and 45 seconds after each full hour on every
+monday and friday if that day is the first or third day of the
+month in the months january, march, may, juli, september and 
+november:
+.paragraph
+.nf
+.HTML <pre>
+   mon,fri *-1/2-1,3 *:30:45
+.HTML </pre>
+.fi
+.paragraph
+.subsection "Incomplete time specs"
+\fIuschedule\fR attempts to complete the TIMESPECs, except for the 
+--from or --to ones. \fI*-\fR is used when year or month is missing,
+\fI*\fR is used when the day is missing, and
+\fI*:\fR is used when hour or minute are missing. If there is no
+time given at all, then \fI0:0:0\fR is used. Examples:
+.paragraph
+.nf
+.HTML <pre>
+  03-05 08:05:40      -> *-03-05 08:05:40
+  05 08:05:40         -> *-*-05 08:05:40
+  08:05:40            -> *-*-* 08:05:40
+  05:40               -> *-*-* *:05:40
+  40                  -> *-*-* *:*:40
+  Sat,Sun 05 08:05:40 -> Sat,Sun *-*-05 08:05:40
+  Sat,Sun 08:05:40    -> Sat,Sun *-*-* 08:05:40
+  2003-03-05 05:40    -> 2003-03-05 *:05:40
+  2003-03-05          -> 2003-03-05 0:0:0
+  03-05               -> *-03-05 0:0:0
+.HTML </pre>
+.fi
+.paragraph
+.section "TIME OFFSET"
+An argument consisting of a plus sign and one to four numbers separated 
+by colons (+[[[dd:]hh:]mm:]ss)
+means to start the job once in the future, at the time reached with the
+current time is added to the argument. dd is the offset in days, hh
+in hours, mm in minutes und ss stands for seconds. That is, 
+.nf
+.HTML <pre>
+  uschedule test +1:0:0:0 
+  uschedule test +24:0:0
+  uschedule test +1440:0
+  uschedule test +86400
+.HTML </pre>
+.fi
+all start the job "test" exactly one day after uschedule is executed.
+.paragraph
+.section DIFFERENCES
+The unix \fIcron\fR daemon executes a job if either day or week 
+or day of month matches. 
+.manlink uscheduled.html uscheduled(8)
+executes it if \fIboth\fR match. The is no way to completely mimic either 
+logic with the other software.
+.paragraph
+Unix \fIcron\fR often needs a separated \fIat\fR daemon to execute 
+one-time-jobs. This is nothing more than a design problem in cron.
+.paragraph
+Unix also provides a \fIbatch\fR command, which executes jobs if
+the system load is low. This is often implemented inside the \fIat\fR
+daemon. \fIuschedule\fR doesn't provide a way to emulate this (note
+that \fIbatch\fR is pointless anyway: if you just have a short job
+then you might as well run it, it doesn't matter. If you have a 
+long and resource-intensive job and don't want your job to 
+eat resources when there's a shortage of them then \fIbatch\fR 
+provides no way to temporarily suspend a job during this time.
+If the resource in question is not system load but memory,
+disk- or network-bandwidth then \fIbatch\fR doesn't help you).
+.paragraph
+Unix \fIcron\fR doesn't support second granularity. \fIuschedule\fR
+does this for only one reason: to help to avoid that all jobs of all
+users start in the same second and overload the system.
+.section AUTHOR
+Uwe Ohse, uwe@ohse.de
+.section "SEE ALSO"
+.manlink uschedulecmd.html uschedulecmd(1) ,
+.manlink intro.html uschedule_intro(7) .
+.HTML <!--
+.paragraph
+The homepage may be more up-to-date, see
+.br
+http://www.ohse.de/uwe/uschedule.html.
+.HTML -->

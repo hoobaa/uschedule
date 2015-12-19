@@ -1,0 +1,82 @@
+uscheduleinstall(8)			      uscheduleinstall(8)
+
+
+
+How to install uschedule
+       This document describes how to download, compile, test and
+       install uschedule.
+
+
+   System requirements:
+       The uschedule package is	 meant	to  run	 under	UNIX  and
+       -lookalikes.
+
+       You'll need the daemontools package by Daniel J. Bernstein
+       to run uschedule, see http://cr.yp.to/daemontools.html for
+       a description and installation instructions.
+
+
+
+   Downloading uschedule:
+       The latest published uschedule package is:
+
+       http://www.ohse.de/uwe/uschedule/uschedule-0.7.1.tar.gz
+
+       You can alternatively download it through FTP:
+
+       ftp://www.ohse.de/uwe/uschedule/uschedule-0.7.1.tar.gz
+
+       Move the downloaded file to /package.
+
+
+   Unpack the package:
+	 # the next command is optional: If you do not use /package,
+	 # you may unpack uschedule anywhere.
+	 $ cd /package
+	 $ gunzip uschedule-0.7.1.tar.gz
+	 $ tar -xpf uschedule-0.7.1.tar
+	 $ rm uschedule-0.7.1.tar
+	 $ cd admin/uschedule-0.7.1
+
+
+   Compile and install the programs, using /package:
+	 $ package/install
+       The  self  check	 is run as part of this and may take some
+       time.   Things  are  fine  if  the  test	 does  not  print
+       anything, but any output is a sign of a problem.
+
+
+
+   Compile and install the programs under /usr/local:
+	 $ make DEST=/usr/local oldinstall
+
+       The  self  check	 is run as part of this and may take some
+       time.   Things  are  fine  if  the  test	 does  not  print
+       anything, but any output is a sign of a problem.
+
+
+   How to report success: (not mandatory)
+	 $ cat src/auto-systype
+	 $ mail uwe-generic-counter@ohse.de <src/auto-systype
+
+       Please  do not send a success email unless the checks were
+       successful.
+
+
+   Mailing list:
+       To subscribe to the uschedule mailing list send a mail  to
+       uschedule-subscribe@lists.ohse.de. The content is ignored.
+
+
+   How to use uschedule:
+       The  uschedule_intro(7)	manual	describes  how	 to   use
+       uschedule.
+
+
+SEE ALSO
+       The homepage may be more up-to-date, see
+       http://www.ohse.de/uwe/uschedule.html.
+
+
+
+uschedule		      0.7.1	      uscheduleinstall(8)

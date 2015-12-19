@@ -1,0 +1,44 @@
+.TH uschedulecmd 1 \*(VE \*(PA      
+.hy 0
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The uschedule package" ../uschedule.html
+.paragraph
+.SH NAME
+uschedulecmd - create a new uschedule jobs
+.LINE
+.section SYNOPSIS
+\fBuschedulecmd\fR [-.] [-d DIR] [-e] [-i ID] [COMMAND ...]
+.section DESCRIPTION
+\fBuschedulecmd\fR creates a new job. If \fICOMMAND\fR is not given
+then command to be executed will be read from the standard input.
+.section OPTIONS
+.options
+.option "-., --dot-as-home"
+The current working directory will be used instead of $HOME.
+.option "-d, --dir=DIR"
+Put the new job into \fIDIR\fR. The default is \fI~/.uschedule/\fR.
+.option "-e, --copy-environment"
+Clone the current environment for the new job.
+.option "-i, --id=ID"
+Give the new job the identifier \fIID\dR. \fIID\fR must be unique
+and must not contain colons, slashes and dots.
+.br
+If this option is not used then a unique numerical ID will be given
+and printed to the standard output.
+.section CAVEAT
+Note that this just creates the command to be run, it doesn't 
+schedule the job to be run at any time. Use the
+.manlink uschedule.html uschedule(1)
+command for this.
+.section AUTHOR
+Uwe Ohse, uwe@ohse.de
+.section "SEE ALSO"
+.manlink uschedule.html uschedule(1) ,
+.manlink intro.html uschedule_intro(7) .
+.HTML <!--
+.paragraph
+The homepage may be more up-to-date, see
+.br
+http://www.ohse.de/uwe/uschedule.html.
+.HTML -->

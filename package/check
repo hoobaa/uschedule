@@ -1,0 +1,8 @@
+#! /bin/sh
+
+package/packagecheck || exit 1
+
+ok=1
+
+cd compile || exit 1
+exec make check

@@ -1,0 +1,194 @@
+2004-08-16 <uwe@ranan.ohse.de>
+
+version:  0.7.1
+check:    fix uscheduleruntimelimit test for the SIGTERM/KILL case, don't
+          depend on exitcode 15, work around the "bla bla Terminated"
+	  misfeature of bash and "Killed" misfeature of OpenBSD /bin/sh.
+bug:      fix uscheduleruntimelimit exit code in case the child was killed
+          by a signal.
+doc:      spelling fixes in uschedule.1.in, uscheduled.8.in
+
+2004-08-15 <uwe@ranan.ohse.de>
+
+check:    check uscheduleruntimelimit
+check:    check uschedule --every
+
+2004-08-12 <uwe@fjoras.ohse.de>
+
+internal: added pre-commit.ChangeLog trigger.
+ui:       implemented --every option
+version:  0.7.1-beta5
+
+2004-08-10 <uwe@fjoras.ohse.de>
+
+ui:       uscheduleconf makes base directory sticky for daemontools <0.75.
+ui:       uschedulelist -S shows the command in addition to the usual
+          list output.
+ui:       add uscheduleruntimelimit tool.
+ui:       uschedule accepts + as synonym for / in TIMESPEC.
+check:    send compiler warnings/stdout to /dev/null.
+internal: some library functions updated from the repository.
+internal: uschedulecmd.c uschedulecp.c svscan_conf.c: buffer_op_t renamed
+          to buffer_op.
+
+2004-05-19 <uwe@tirka.ohse.de>
+
+internal: switch to new uogetopt.
+
+2004-05-16 <uwe@tirka.ohse.de>
+
+internal: some library functions updated from the repository.
+
+2004-05-13 <uwe@tirka.ohse.de>
+
+bug:      uschedulelist -s showed the "next" time as "last" time.
+          Noted by Andrew A. Raines.
+
+2003-03-07 <uwe@ranan.ohse.de>
+
+internal: remove a number of icc warnings.
+internal: build tools allow for easier compiler/linker configuration.
+ui:       uschedulerm now tells if it hasn't removed any job for a given
+          commandline argument.
+
+2003-03-06 <uwe@ranan.ohse.de>
+
+doc:      fix "how to report success"
+ui:       added suggestion when notice() can't signal the daemon.
+ui:       added +dd:hh:mm:ss to uschedule.
+doc:      fix installation instructions.
+
+2003-03-05 <uwe@ranan.ohse.de>
+
+ui:       uschedule now attempts to complete incomplete timespecs.
+check:    check this.
+
+2003-03-03 <uwe@ranan.ohse.de>
+
+version:  0.7.0
+ui:       uscheduleconf now has a --no-user-change option.
+
+2003-03-03 <uwe@ranan.ohse.de>
+
+internal: change !str_equal to str_diff.
+internal: cleanup include handling, remove nowarn.h.
+bugfix:   uscheduleconf treated a logusername "-" wrong -> security breach.
+          Impact: multilog ran as root. Noted by Zas <zas@norz.org>.
+	  Fix: remove "-" user and loguser cases, simplify critical code
+	  path.
+ui:       changed the way PATH is built.
+doc:      document that. document environment variables in env/, too.
+          Document how PATH is constructed.
+package:  add note about security problem to package installation.
+
+2003-02-27 <uwe@ranan.ohse.de>
+
+internal: sync library against uolib (now uses mssort instead of qsort).
+ui:       implement -. option whereever it may be useful.
+
+2003-02-24 <uwe@ranan.ohse.de>
+
+internal: replace qsort with shell sort.
+
+2002-10-28 <uwe@ranan.ohse.de>
+
+version:  0.6.1
+bug:      manual pages not installed
+
+2002-10-16 <uwe@ranan.ohse.de>
+
+ui:       implement start/end date+times in the programs.
+check:    check that.
+version:  0.6.0
+ui:       uschedulelist now prints months in the 1..12 range, not 0..11.
+internal: updated library files from the repository, mostly PD clarification.
+
+2002-05-15 <uwe@fjoras.ohse.de>
+
+check:    add a number of set -e to subshell calls.
+
+2001-12-05 <uwe@fjoras.ohse.de>
+
+bug:      oversight: uschedulecmd should have had uogo_posixmode set, so
+          options given to the child command would not have been 
+          interpreted as options for uschedulecmd. Now uogo_posixmode
+          is set in all programs (consistency).
+          
+2001-11-18 <uwe@fjoras.ohse.de>
+
+internal: removed superfluous includes. (uschedule.c, uschedulecmd.c,
+          uschedulecp.c)
+internal: use wrappers around stat, ctime, qsort, strftime in many places.
+          (uschedulerm.c, print_job.c, uscheduleedit.c, uschedulecmd.c,
+          uscheduled.c, uschedulelist.c)
+version:  0.5.8
+
+2001-11-02 <uwe@fjoras.ohse.de>
+
+bug:      uscheduleconf misconfigured the service if a log account was 
+          given.
+version:  0.5.7
+
+2001-10-29 <uwe@fjoras.ohse.de>
+
+bug:      fix stupid configuration bug. uscheduleconf included a buggy exec
+          call. I never caught that since it only hurts after some time and
+          all my long-running installations (as opposed to test ones) are
+          from before the time this bug went in (early september). Thanks
+          to Gerrit Pape.
+          XXX need a check for this.
+version:  0.5.6
+
+2001-10-23 <uwe@fjoras.ohse.de>
+
+internal: use new API around dirent.h. Fixes possible problem when 
+          a directory gets modified in the time we read it.
+          Impact: make_id.c load_jobs.c uschedulelist.c api_dir.c api_dir.h
+bug:      self check still failed on systems with a different ls implementation.
+version:  0.5.5
+
+2001-10-20 <uwe@fjoras.ohse.de>
+
+doc:      uschedulecmd.1.in incorrectly used uschedulejob as name of the
+          uschedulecmd command. Noted by kromJx <kromJx@crosswinds.net>.
+bug:      uscheduleconf created a job starting scheduled, not uscheduled.
+          Noted by Alexander Lazic.
+ui:       Typos fixed in parse_timespec.c, by kromJx <kromJx@crosswinds.net>.
+bug:      self check failed if the local machine had a time zone other than
+          UTC. Noted by multiple people, Roy Lanek may have been the first.
+bug:      self check failed if the file system blocksize was different from
+          the one used on all of my developement machines.
+version:  0.5.4
+
+2001-09-18 <uwe@fjoras.ohse.de>
+
+doc:      fixed bug in intro.html
+
+2001-09-07 <uwe@fjoras.ohse.de>
+
+ui:       added resource limits to uscheduleconf
+doc:      added security warnings for uscheduleconf
+doc:      added details to intro.
+check:    some test behaved differently when run as root. removed them.
+check:    start docheck with empty environment
+internal: iopause.sh left temporary files.
+internal: fixed packaging bug
+version:  0.5.3 (0.5.2 was internal)
+
+2001-09-06 <uwe@fjoras.ohse.de>
+
+internal: created package.check
+internal: updated a number of scripts from the repository
+internal: switched to auto-xxx filenames for most of the automatically 
+          generated things.
+ui:       changed "schedule" to "uschedule" in a number of strings.
+ui:       change permission handling to be more restrictive
+check:    added additional check.
+doc:      fixed intro.
+version:  0.5.1
+
+2001-08-17 <uwe@fjoras.ohse.de>
+
+version:  0.5.0
+comment:  first internal release
+

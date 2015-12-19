@@ -1,0 +1,85 @@
+Version 0.7.1, August 2004:
+
+* fixed uschedulelist --short (-s), which used to display the "next" 
+  instead of the "last" time.
+* "uschedule --every X" (-e) repeats a job with a given interval X.
+* The new uscheduleruntimelimit tool allows to limit the run time of a job.
+* uscheduleconf makes base directory sticky for daemontools <0.75.
+* uschedulelist --show-command (-S) shows the command in addition to the 
+  usual list output.
+* uschedule accepts + as synonym for / in TIMESPEC.
+
+Version 0.7.0, March 2003:
+
+* implemented -. option ("use . instead of $HOME").
+* bugfix, "-" as username or logusername was mistreated.
+
+  *** Impact: the user may have got root rights. ***
+
+  Note: older versions may have left a multilog running as root instead
+  of the user. Impact: the user may have got root rights.
+  Fix: Go though /service/*uschedule*/log/run and add 
+    setuidgid "username" \
+  after the line containing the softlimit call and before the line 
+  containing run. Afterwards the file should look like this:
+    #! /bin/sh
+    exec 2>&1
+    cd '...SOMEWHERE...' || exit 1
+    exec \
+    softlimit -m 8000000 -o 400 -p 40 \
+    setuidgid USERNAME \
+    ./run
+
+  The code containing the bug has been rewritten and simplified.
+
+* uscheduleconf now has a --no-user-change option.
+
+Version 0.6.1, October 2002:
+
+* installed manual pages again.
+
+Version 0.6.0, October 2002:
+
+* uschedulecmd used to steal and misinterpret options given to the child 
+  command. Now all programs stop parsing looking for options after the
+  first non-option argument.
+* implemented start/end times for jobs. See the uschedule manual page
+  for more information.
+* uschedulelist now prints all month in the 1..12 range, not 0..11 anymore.
+
+Version 0.5.8, November 2001:
+
+* internal changes to get rid of some warnings.
+* the same format is used whereever a time is printed.
+
+Version 0.5.7, November 2001:
+
+* uscheduleconf created completely broken configuration if a log account
+  different from the user account was given.
+
+Version 0.5.6, October 2001:
+
+* uscheduleconf created buggy call to multilog.
+
+Version 0.5.5, October 2001:
+
+* fixed another self check problem.
+
+Version 0.5.4, October 2001:
+
+* fixed a number of documentation bugs.
+* uscheduleconf now starts uscheduled instead of the nonexistant scheduled.
+* self check now works if the machine has a time zone different from UTC
+  or the local file system has a block size different from 8k.
+
+Version 0.5.3, September 2001:
+
+* first public release.
+
+Version 0.5.1 to 0.5.2, September 2001:
+
+* internal release.
+
+Version 0.5.0, August 2001:
+
+* first internal release.

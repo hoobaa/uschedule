@@ -1,0 +1,41 @@
+.TH uscheduleedit 1 \*(VE \*(PA      
+.hy 0
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The uschedule package" ../uschedule.html
+.paragraph
+.SH NAME
+uscheduleedit - edit a uschedule command
+.LINE
+.section SYNOPSIS
+\fBuscheduleedit\fR [-.] [-d DIR] ID
+.section DESCRIPTION
+\fBuscheduleedit\fR allows you to edit the registered uschedule command with
+the identifier \fIID\fR, using $VISUAL, $EDITOR or vi.
+.paragraph
+Note that a command may be described by two different files, so don't
+be surprised if your editor offers you to edit two files.
+.section OPTIONS
+.options
+.option "-., --dot-as-home"
+The current working directory will be used instead of $HOME.
+.option "-d, --dir=DIR"
+Read jobs from \fIDIR\fR. The default is \fI~/.uschedule/\fR.
+.section CAVEAT
+If the editor of your choice breaks hard links then
+\fBuschedulerm\fR will lose the ability to recognize which registered
+commands are still in use. It will then not inform you a command you
+want to delete about that and will not stop you from deleting it. The
+daemon is able to deal with this, though.
+.section AUTHOR
+Uwe Ohse, uwe@ohse.de
+.section "SEE ALSO"
+.manlink uschedule.html uschedule(1) ,
+.manlink uschedulecmd.html uschedulecmd(1) ,
+.manlink intro.html uschedule_intro(7) .
+.HTML <!--
+.paragraph
+The homepage may be more up-to-date, see
+.br
+http://www.ohse.de/uwe/uschedule.html.
+.HTML -->

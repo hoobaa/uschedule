@@ -1,0 +1,572 @@
+#! /bin/sh
+rm -f t.c t.o t 
+rm -rf test.dir
+
+LC_ALL=C ; export LC_ALL
+LANG=C ; export LANG
+TZ=UTC; export TZ
+me=`id -un`
+
+echo "--- parse_sched works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int o(const unsigned char *s, int l)
+{
+	unsigned int i;
+	for (i=0;i<l;i++) {
+		if (s[i]<32 || s[i]>126) {
+			char b[20];
+			write(1,b,sprintf(b,"_%x_",s[i]));
+		} else 
+			write(1,s+i,1);
+	}
+}
+int main(int argc, char **argv)
+{
+	int i;
+	struct schedinfo si;
+	char b[100];
+	for (i=1;i<argc;i++) {
+		o(argv[i],str_len(argv[i]));
+		write(1,"\n  ",3);
+		if (!preparse_schedspec(&si,argv[i],strlen(argv[i]))) {
+			o("parse error",11);
+			write(1,"\n",1);
+			continue;
+		}
+		o(b,sprintf(b,"%lu",si.W));
+		o(" ",1);
+		if (si.Y) o(si.Y,si.Ylen);
+		else o("*",1);
+		o(" ",1);
+		if (si.M) o(si.M,si.Mlen);
+		else o("*",1);
+		o(" ",1);
+		if (si.D) o(si.D,si.Dlen);
+		else o("*",1);
+		o(" ",1);
+		if (si.h) o(si.h,si.hlen);
+		else o("*",1);
+		o(" ",1);
+		if (si.m) o(si.m,si.mlen);
+		else o("*",1);
+		o(" ",1);
+		if (si.s) o(si.s,si.slen);
+		else o("*",1);
+		o(" ",1);
+		write(1,"\n",1);
+	}
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o parse_sched.o libuomisc.a libunix.a  libbyte.a
+./t ""
+./t "W127Y2001M0D0h0m0s0"
+./t "W128Y2001M0D0h0m0s0"
+./t "Y2001M0D0h0m0s0"
+./t "Y2001,2002M0D0h0m0s0"
+./t "Y2001,2002M0D0h0m0s0A0"
+./t "A0Y2001,2002M0D0h0m0s0"
+./t "0Y2001,2002M0D0h0m0s0"
+./t "Y2001,2002aM0D0h0m0s0"
+./t "Y2001,2002a0M0D0h0m0s0"
+./t "M0h0s0Y2000D0m0"
+./t "M0h0s0 Y2000D0m0"
+
+echo "--- parse_job works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int o(const unsigned char *s, int l)
+{
+	unsigned int i;
+	for (i=0;i<l;i++) {
+		if (s[i]<32 || s[i]>126) {
+			char b[20];
+			write(1,b,sprintf(b,"_%x_",s[i]));
+		} else 
+			write(1,s+i,1);
+	}
+}
+int main(int argc, char **argv)
+{
+	int i;
+	struct jobinfo j;
+	char b[100];
+	for (i=1;i<argc;i++) {
+		o(argv[i],str_len(argv[i]));
+		write(1,"\n",1);
+		if (!parse_job(argv[i],&j))
+			continue;
+		o(b,sprintf(b," %08lx%8.8lx ",j.lastrun.sec.x>>32,
+			j.lastrun.sec.x&0xffffffff));
+		o(j.id,j.idlen);
+		o(b,sprintf(b," %lu",j.late));
+		o(b,sprintf(b," %lu ",j.repeats));
+		o(j.cronspec,j.cronlen);
+		o(" ",1);
+		o(j.comment,j.commentlen);
+		if (j.null1) o(" null1",6);
+		if (j.null2) o(" null2",6);
+		if (j.fromspec) o(j.fromspec,j.fromlen);
+		if (j.tospec) o(j.tospec,j.tolen);
+		write(1,"\n",1);
+	}
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o parse_job.o libuomisc.a libunix.a  libbyte.a
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@8000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@0000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+# bad last
+./t "@000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@00000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+# bad ID
+./t "@4000000000000000::60:0:W12h0m0s0:just a comment:null1,null2"
+# scan_ulong doesn't recognize overflows. Oh well.
+./t "@4000000000000000:ID1:999999999:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1::0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:10:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:1:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:999999999:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60::W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0::just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0:W1Y1900D1M1h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0::null1,null2"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null2"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,unknown"
+./t "@4000000000000000X:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:a60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60a:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0a:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:a0:W12h0m0s0:just a comment:null1,null2"
+echo "--- make_name works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int o(const unsigned char *s, int l)
+{
+	unsigned int i;
+	for (i=0;i<l;i++) {
+		if (s[i]<32 || s[i]>126) {
+			char b[20];
+			write(1,b,sprintf(b,"_%x_",s[i]));
+		} else 
+			write(1,s+i,1);
+	}
+}
+int main(int argc, char **argv)
+{
+	int i;
+	struct jobinfo j;
+	static stralloc sa;
+	char b[100];
+	for (i=1;i<argc;i++) {
+		o("in  ",4);
+		o(argv[i],str_len(argv[i]));
+		write(1,"\n",1);
+		if (!parse_job(argv[i],&j))
+			continue;
+		make_name(&sa,&j);
+		o("out ",4);
+		o(sa.s,sa.len-1);
+		write(1,"\n",1);
+	}
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o make_name.o parse_job.o libuomisc.a libtai.a libunix.a libbyte.a
+./t "@0000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,"
+./t "@4000000000000000:ID1:600:0:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:100:W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0:Y126W12h0m0s0:just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0::just a comment:null1,null2"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0::"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2::"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2:D1:D3"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2::D3"
+./t "@4000000000000000:ID1:60:0:W12h0m0s0:just a comment:null1,null2:D4:"
+
+echo "--- fill_timespec works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int main(int argc, char **argv)
+{
+	int i;
+	static stralloc sa;
+	for (i=1;i<argc;i++) {
+		fill_timespec(&sa,argv[i]);
+		write(1,argv[i],str_len(argv[i]));
+		write(1," -> ",4);
+		write(1,sa.s,sa.len-1);
+		write(1,"\n",1);
+	}
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o parse_timespec.o libuomisc.a libuotime.a libunix.a  libbyte.a
+./t "Sat,Sun 2001-1-1 00:00:00"
+./t "Sat0 2001-1-1 00:00:00" # gigo.
+./t "2003-03-05 08:05:40"
+./t "03-05 08:05:40"
+./t "05 08:05:40"
+./t "08:05:40"
+./t "05:40"
+./t "40"
+./t "Sat,Sun 05 08:05:40"
+./t "Sat,Sun 08:05:40"
+./t "Sat,Sun 05:40"
+./t "Sat,Sun 40"
+./t "2003-03-05 05:40"
+./t "2003-03-05 40"
+./t "2003-03-05"
+./t "03-05"
+./t "05"
+./t "Sat,Sun 2003-03-05"
+echo "--- parse_timespec works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int main(int argc, char **argv)
+{
+	int i;
+	static stralloc sa;
+	for (i=1;i<argc;i++) {
+		parse_timespec(&sa,argv[i]);
+		write(1,argv[i],str_len(argv[i]));
+		write(1," -> ",4);
+		write(1,sa.s,sa.len);
+		write(1,"\n",1);
+	}
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o parse_timespec.o libuomisc.a libuotime.a libunix.a  libbyte.a
+./t "1970-1-1 00:00:00" "1992-02-02 23:59:59" "2001-12-31 23:59:59"
+./t "1970-2-29 00:00:00"
+./t "2001-06-15 15:00:00" "1969-06-15 15:00:00"
+./t "2100-12-31 15:00:00" "2101-01-01 00:00:00"
+./t "2000-0-15 15:00:00"
+./t "2000--6-15 15:00:00"
+./t "2000-00-15 15:00:00"
+./t "2000-13-15 15:00:00"
+./t "2000-06-0 15:00:00"
+./t "2000-06--1 15:00:00"
+./t "2000-06-32 15:00:00"
+./t "2001-06-15 24:00:00"
+./t "2001-06-15 23:60:00"
+./t "2001-06-15 23:00:60"
+./t "Sun,Mon,Tue,Wed,Thu,Fri,Sat 2001-06-15 23:00:00"
+./t "Mon,Tue,Wed,Thu,Fri,Sat 2001-06-15 23:00:00"
+./t "Sun,Mon,Tue,Wed,Thu,Fri 2001-06-15 23:00:00"
+./t "Tue 2001-06-15 23:00:00"
+./t "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday 2001-06-15 23:00:00"
+./t "Monday,Tuesday,Wednesday,Thursday,Friday,Saturday 2001-06-15 23:00:00"
+./t "Sunday,Monday,Tuesday,Wednesday,Thursday,Friday 2001-06-15 23:00:00"
+./t "Wednesday 2001-06-15 23:00:00"
+./t "Mon,Thursday *-*-* 15:00:00"
+./t "Mon,Thursday */4-*-* 15:00:00"
+./t "Mon,Thursday 1970/20-*-* 15:00:00"
+./t "Mon,Thursday 1970,2020-*-* 15:00:00"
+./t "Mon,Thursday *-1/2-* 15:00:00"
+./t "Mon,Thursday *-11/2-* 15:00:00"
+./t "Mon,Thursday *-1,2-* 15:00:00"
+./t "Mon,Thursday *-*-1/6 15:00:00"
+./t "Mon,Thursday *-*-2/6 15:00:00"
+./t "Mon,Thursday *-*-1,6 15:00:00"
+./t "Mon,Thursday *-*-* *:00:00"
+./t "Mon,Thursday *-*-* 1,13:00:00"
+./t "Mon,Thursday *-*-* 11/6:00:00"
+./t "Mon,Thursday *-*-* 1/6:00:00"
+./t "Mon,Thursday *-*-* *:1,31:00"
+./t "Mon,Thursday *-*-* *:0/10:00"
+./t "Mon,Thursday *-*-* *:*:0,30"
+./t "Mon,Thursday *-*-* *:*:0/30"
+./t "Mon,Thurday *-*-* *:*:0"
+./t "Mo,Thursday *-*-* *:*:0"
+./t "*,Thursday *-*-* *:*:0"
+./t "Mon,Thursday *-*-* *:*:0 "
+./t "Mon,Thursday  *-*-* *:*:0"
+./t "Mon,Thursday  *-*-*  *:*:0"
+./t " *-*-* *:*:0"
+./t "Mon,,Thursday *-*-* *:*:0"
+./t "Wednesday 2001-06-15 23:00:00+15"
+./t "Wednesday 2001-06+1-15+7 23:00:00"
+echo "--- make_id works"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+int main(int argc, char **argv)
+{
+	int i;
+	static stralloc sa;
+	i=make_id(&sa);
+	write(i,sa.s,sa.len-1);
+	return 0;
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o make_id.o libuomisc.a libunix.a  libbyte.a
+rm -rf test.dir ; mkdir test.dir
+( set -e ; cd test.dir ; ../t ; cat 1 ; echo )
+rm -rf test.dir ; mkdir test.dir
+( set -e ; cd test.dir ; touch 1 2 3 ; ../t ; cat 4 ; echo )
+# they behave differently when run as root.
+#rm -rf test.dir ; mkdir test.dir ; chmod 500 test.dir
+#( cd test.dir ; ../t ; echo )
+#rm -rf test.dir ; mkdir test.dir  ; O="`pwd`"
+#( cd test.dir ; chmod 400 . ; $O/t ; echo )
+
+# now to the most horrible function aboard ...
+echo "--- find_next links"
+cat >t.c <<EOF
+#include "scheduled.h"
+#include <stdio.h>
+#include <time.h>
+#include <sys/time.h>
+time_t scan(char *s, const char *what)
+{
+	unsigned long ul;
+	struct tm tm;
+	time_t t;
+	char buf[128];
+	fputs(what,stdout);
+	fputs(" ",stdout);
+	fputs(s,stdout);
+	fputs(" ",stdout);
+	scan_ulong(s+12,&ul); tm.tm_sec=ul; s[12]=0;
+	scan_ulong(s+10,&ul); tm.tm_min=ul; s[10]=0;
+	scan_ulong(s+8,&ul); tm.tm_hour=ul; s[8]=0;
+	scan_ulong(s+6,&ul); tm.tm_mday=ul; s[6]=0;
+	scan_ulong(s+4,&ul); tm.tm_mon=ul-1; s[4]=0;
+	scan_ulong(s+0,&ul); tm.tm_year=ul-1900;
+	tm.tm_isdst=0;
+	tm.tm_gmtoff=0;
+	t=mktime(&tm);
+/*
+	strftime(buf,sizeof(buf),"%Y-%m-%d %H:%M:%S",gmtime(&t));
+	fputs(what,stdout);
+	puts(buf);
+*/
+	return t;
+}
+int main(int argc, char **argv)
+{
+	int i;
+	struct jobinfo j;
+	uint64 ui64;
+	puts(argv[1]+1);
+	if (!parse_job(argv[1],&j)) { puts("failed to parse job"); }
+	else if (!scan_xint64(argv[2],&ui64)) {puts("failed to scan now value");}
+	else {
+		struct taia now;
+		struct taia then;
+		unsigned long ul;
+		time_t tnow;
+		time_t tlast;
+		struct tm *tm;
+		char buf[128];
+		tnow=scan(argv[2],"now");
+		tlast=scan(argv[3],"last");
+		tai_unix(&now.sec,tnow); now.atto=now.nano=0;
+		tai_unix(&j.lastrun.sec,tlast);
+		if (!find_next(&j,&now,&then)) {
+		  puts("no next event");
+		} else {
+		  time_t t=then.sec.x-4611686018427387914ULL;
+		    fputs(" then ",stdout);
+			strftime(buf,sizeof(buf),"%a %Y-%m-%d %H:%M:%S",gmtime(&t));
+			puts(buf);
+		}
+	}
+	exit(0);
+}
+EOF
+./auto-compile.sh -c t.c >/dev/null 2>/dev/null
+./auto-link.sh t t.o parse_timespec.o make_id.o find_next.o parse_job.o parse_sched.o libuomisc.a libuotime.a libtai.a libunix.a  libbyte.a
+T() {
+ ./t "$1" "$2" "$3" | tai64nlocal
+# echo "$1" "$2" "$3" 
+# gdb ./t 
+}
+#echo debugging find_next
+
+#T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980314050000 19980101000000
+echo "--- find_next works for simple cases"
+# T spec now last
+# run on *-01-01 00:00:00
+T "@0000000030000000:ID:3600:0:M0D0h0m0s0::" 19960227000000 19960226235959
+T "@0000000030000000:ID:3600:0:M0D0h0m0s0::" 19960227000000 19950101000000
+T "@0000000030000000:ID:2500000:0:D0h0m0s0::" 19960227000000 19960226235959
+T "@0000000030000000:ID:2500000:0:D0h0m0s0::" 19960227000000 19950101000000
+T "@0000000030000000:ID:3600:0:s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:m0s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:h0m0s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:D1h0m0s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:D28h0m0s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:M2D28h0m0s0::" 19960227000010 19960227000000
+T "@0000000030000000:ID:3600:0:Y1999M2D28h0m0s0::" 19960227000010 19960227000000
+echo "--- find_next handles rollovers"
+T "@0000000030000000:ID:1:0:h23m59s0::" 19960227235959 19960227235958
+T "@0000000030000000:ID:1:0:M1D27h23m59s0::" 19960227235959 19960227235958
+echo "--- find_next handles leap years"
+# run on *-02-29 00:00:00
+T "@0000000030000000:ID:3600:0:M1D29h0m0s0::" 19950227000000 19950101000000
+T "@0000000030000000:ID:3600:0:M1D29h0m0s0::" 19960227000000 19960101000000
+T "@0000000030000000:ID:3600:0:M1D29h0m0s0::" 19970227000000 19970101000000
+T "@0000000030000000:ID:3600:0:M1D29h0m0s0::" 19980227000000 19980101000000
+echo "--- find_next handles weekday and day-of-month"
+T "@0000000030000000:ID:3600:0:W1M1D29h17m17s17::" 19980227000000 19980101000000
+#T "@0000000030000000:ID:3600:0:s0::"         1996-02-27-00-00-00 
+#T "@0000000030000000:ID:3600:0:D29h0m0s0::"  1995-02-27-00-00-00 
+#T "@0000000030000000:ID:3600:0:D29h0m0s0::"  1996-02-27-00-00-00
+#T "@0000000030000000:ID:3600:0:D29h0m0s0::"  1997-02-27-00-00-00 
+echo "--- find_next handles from/to"
+# T spec now last
+# "everyday at 04:00 from the 7th of march to the 14th of may"
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980227000000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980314050000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980315050000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980513050000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980514025959 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980514035959 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980514040000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14h4m0s0" 19980514045959 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980514050000 19980101000000
+T "@0000000030000000:ID:3600:0:h4m0s0:::M2D7:M4D14" 19980514112900 19980101000000
+echo "--- find_next handles every"
+# T spec now last
+T "@0000000000000000:ID:3600:0:h4m0s0:::::128" 19980227000000 19980101000000
+T "@0000000000000000:ID:3600:0::::::128" 19980227000000 19980101000000
+T "@0000000000000000:ID:3600:0::::::128" 19980227000000 19980227000000
+T "@0000000000000000:ID:3600:0::::::128" 19980227000000 19980227000209
+T "@0000000000000000:ID:3600:0:s0:::::128" 19980227000000 19980227000209
+T "@0000000000000000:ID:3600:0:M5h20s0:::::128" 19980227000000 19980227000209
+echo "--- scheduleconf works (both user directories given)"
+rm -rf test.dir
+./uscheduleconf --no-user-change `pwd`/test.dir $me $me `pwd`/test.dir/user `pwd`/test.dir/user/log
+echo "--- scheduleconf works (both user directories given)"
+rm -rf test.dir
+./uscheduleconf --no-user-change `pwd`/test.dir $me $me `pwd`/test.dir/user `pwd`/test.dir/user/log
+# filter out owner name, group name, number of bytes in the file, date and time
+filter='{$3=$4=$5=$6=$7=$8=""; print }'
+# XXX SUSV2 allows file mode to contain "optional alternate access method 
+# flag". This might lead to test failures. For the moment i hope that 
+# this just will not happen.
+find test.dir -type d |xargs ls -ld | awk "$filter"
+find test.dir -type f |xargs ls -l | awk "$filter"
+find test.dir -type p |xargs ls -l | awk "$filter"
+echo "--- scheduleconf works (one user directory given)"
+rm -rf test.dir
+./uscheduleconf --no-user-change `pwd`/test.dir $me $me `pwd`/test.dir/user
+find test.dir -type d |xargs ls -ld | awk "$filter"
+find test.dir -type f |xargs ls -l | awk "$filter"
+find test.dir -type p |xargs ls -l | awk "$filter"
+echo "--- uschedule works as expected"
+rm -rf test.dir
+( 
+  HOME=`pwd`/test.dir 
+  export HOME
+  O=`pwd`
+  mkdir "$HOME" || exit 1
+  cd "$HOME" || exit 1
+  $O/uscheduleconf --no-user-change `pwd`/root $me $me "$HOME/.uschedule" || exit 1
+  rm -f $HOME/.uschedule/fifo # get rid of warnings due to not-running daemon
+  touch $HOME/.uschedule/fifo
+  $O/uschedulecmd -i j1 'echo true'
+  $O/uschedule j1 '*-*-* 00:00:01'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule j1 '*-1,7-* 00:00:02'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule j1 '2002,2004,2007-*-* 00:00:03'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule j1 'Sat,Sun *-*-* 00:00:04'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule --count 10 j1 '*-*-* 00:00:05'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule --description "testjob" j1 '*-*-* 00:00:06'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule --from "*-10-1 00:00:00" j1 '*-*-* 00:00:07'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule --to "2001-7-1 00:00:00" j1 '*-*-* 00:00:09'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  $O/uschedule --from "*-4-1 00:00:00" --to "*-6-30 23:00:00" \
+                   j1 '*-*-* 00:00:10'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+
+  echo "--- uschedule handles weekdays in from/to specs"
+  $O/uschedule --from "Sat, *-4-1 00:00:00" --to "Fri, *-6-30 23:00:00" \
+                   j1 '*-*-* 00:00:10'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+  $O/uschedule --from "Sat, *-*-* 00:00:00" j1 '*-*-* 00:00:10'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+  echo "--- uschedule handles bad from/to specs"
+  $O/uschedule --to "*-7-1 00:00:00" j1 '*-*-* 00:00:09'
+  $O/uschedule --to "*-7-* 00:00:00" j1 '*-*-* 00:00:09'
+  $O/uschedule --to "2001-7-* 00:00:00" j1 '*-*-* 00:00:09'
+  echo "--- uschedule handles bad number of arguments"
+  $O/uschedule
+  $O/uschedule j1
+  echo "--- uscheduleconf handles bad number of arguments"
+  $O/uscheduleconf 
+  $O/uscheduleconf 1 
+  $O/uscheduleconf 1 2
+  $O/uscheduleconf 1 2 3 4 5 6
+  echo "--- uschedulecp handles bad number of arguments"
+  $O/uschedulecp 
+  $O/uschedulecp 1 2 3 
+  echo "--- uscheduled handles bad number of arguments"
+  $O/uscheduled 1
+  echo "--- uscheduleedit handles bad number of arguments"
+  $O/uscheduleedit 
+  $O/uscheduleedit 1 2
+  echo "--- uschedulelist handles bad number of arguments"
+  $O/uschedulelist 1 2
+  echo "--- uschedulerm handles bad number of arguments"
+  $O/uschedulerm
+  echo "--- uscheduleruntimelimit works as expected"
+  (
+    exec 2>/dev/null
+    $O/uscheduleruntimelimit 3 sh -c 'sleep 30'
+    exit $?
+  )
+  if test x$? = x0 ; then
+    echo "bad"
+  else
+    echo "good"
+  fi
+  $O/uscheduleruntimelimit 10 true            >/dev/null 2>/dev/null ; echo $?
+  echo "--- uschedule handles --every"
+  $O/uschedule --every 10d j1 '*-*-* 00:00:09'
+  $O/uschedulelist --now 1000000000
+  $O/uschedulerm -N j1 
+)
+
+rm -f t.c t.o t 
+rm -rf test.dir
+exit 0

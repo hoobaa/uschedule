@@ -1,0 +1,10 @@
+test -d "command/." || mkdir "command"
+cp "compile/uscheduleedit" "./command/" || exit 1
+cp "compile/uschedulerm" "./command/" || exit 1
+cp "compile/uscheduleruntimelimit" "./command/" || exit 1
+cp "compile/uschedulecmd" "./command/" || exit 1
+cp "compile/uscheduleconf" "./command/" || exit 1
+cp "compile/uschedule" "./command/" || exit 1
+cp "compile/uschedulecp" "./command/" || exit 1
+cp "compile/uscheduled" "./command/" || exit 1
+cp "compile/uschedulelist" "./command/" || exit 1

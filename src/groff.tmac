@@ -1,0 +1,91 @@
+." intlink tagname rest
+.de intlink
+. ie \\n[www-html] \{\
+.  HTML <a href="#\\$1">\\$1</a>\\$2
+. \} 
+. el \{ \fB\\$1\fR\\$2 \} 
+..
+." extlink URL text rest
+.de extlink
+. ie \\n[www-html] \{\
+.  HTML <a href="\\$1">\\$2</a>\\$3
+. \} 
+. el \{ \fB\\$1\fR\\$3 \} 
+..
+.de manlink
+. ie \\n[www-html] \{\
+.  HTML <a href="\\$1">\\$2</a>\\$3
+. \} 
+. el \{ \fB\\$2\fR\\$3 \} 
+..
+.de paragraph
+.HTML <p>
+.P
+..
+.de section
+. ie \\n[www-html] \{\
+.HTML <p><h2>\\$1</h2><p>
+. \}
+. el \{
+.SH \\$1
+. \}
+..
+.de subsection
+. ie \\n[www-html] \{\
+.HTML <p><h3>\\$1</h3><p>
+. \}
+. el \{
+.SS \\$1
+. \}
+..
+." type name (args ..."
+.de func
+.HTML <dl>
+.HTML <dt>
+\\$1 \fB\\$2\fR\\$3
+..
+.de args
+.br
+.HTML <dd>
+    \\$1
+..
+.de endfunc
+.br
+.HTML </dl>
+.P
+..
+.de options
+. HTML <dl>
+..
+.de option
+. ie \\n[www-html] \{\
+. HTML "<dt>\\$1<dd>"
+. \}
+. el \{
+.HP
+\\$1
+.br
+. \}
+..
+.de optionparagraph
+.HTML <p>
+.IP
+..
+.de endoptions
+. HTML </dl>
+..
+.de list
+.HTML <ul>
+..
+.de entry
+. ie \\n[www-html] \{\
+. HTML "<li>\\$1"
+. \}
+. el \{ .TP 3
+*
+\\$1
+\}
+..
+.de endlist
+.HTML </ul>
+..

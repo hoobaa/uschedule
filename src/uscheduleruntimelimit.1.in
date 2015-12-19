@@ -1,0 +1,46 @@
+.TH uschedulecp 1 \*(VE \*(PA      
+.hy 0
+.URL "Uwe Ohse" ../uwe.html
+.br
+.URL "The uschedule package" ../uschedule.html
+.paragraph
+.SH NAME
+uscheduleruntimelimit - start child and kill it after some time
+.LINE
+.section SYNOPSIS
+\fBuscheduleruntimelimit\fR LIMIT CHILD [...]
+.section DESCRIPTION
+\fBuscheduleruntimelimit\fR starts \fICHILD\fR and sends it a \fITERM\fR 
+signal after the \fILIMIT\fR has been reached. 5 seconds later a \fIKILL\fR
+signal is sent.
+
+\fBuscheduleruntimelimit\fR exits as soon as the \fICHILD\fR exits, 
+preserving it's exit code.
+
+\fILIMIT\fR is given as number and by default interpreted as seconds. To
+change it's meaning to minutes (or hours, days) append a \fIm\fR (or
+\fIh\fR, \fId\fR) character.
+.manlink uschedule.html uschedule(1)
+command for this.
+.section HISTORY
+This option was added for uschedule 0.7.1.
+.section EXAMPLES
+.subsection
+  uscheduleruntimelimit 6 sh -c 'sleep 30'
+
+will exit  after 6 seconds.
+.subsection
+  uscheduleruntimelimit 6m sh -c 'sleep 30'
+
+will exit  after 30 seconds.
+.section AUTHOR
+Uwe Ohse, uwe@ohse.de
+.section "SEE ALSO"
+.manlink uschedule.html uschedule(1) ,
+.manlink intro.html uschedule_intro(7) .
+.HTML <!--
+.paragraph
+The homepage may be more up-to-date, see
+.br
+http://www.ohse.de/uwe/uschedule.html.
+.HTML -->

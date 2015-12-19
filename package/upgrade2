@@ -1,0 +1,29 @@
+#! /bin/sh
+
+# check for the security problem in versions below 0.7.0
+x=0
+for i in /etc/*schedule* /service/*schedule*/log/run ; do
+  if test -f $i ; then
+    if grep setuidgid $i >/dev/null ; then	
+      :
+    else
+      if test $x = 0 ; then echo ; echo ; fi
+      echo "*** Please check $i for a possible security problem."
+      x=1
+    fi
+  fi
+done
+if test $x = 1 ; then
+  echo
+  echo "*** For more information please read"
+  echo "*** `pwd`/doc/SECURITY-BUG"
+  echo
+else
+  cat <<EOF
+
+*** In versions before 0.7.0 uscheduleconf may have created insecure 
+*** configurations. For more information please read
+*** `pwd`/doc/SECURITY-BUG
+
+EOF
+fi
