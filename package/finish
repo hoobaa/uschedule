@@ -8,3 +8,5 @@ cp "compile/uschedule" "./command/" || exit 1
 cp "compile/uschedulecp" "./command/" || exit 1
 cp "compile/uscheduled" "./command/" || exit 1
 cp "compile/uschedulelist" "./command/" || exit 1
+
+cp "compile/uscheduleconf-runit" "./command/" || exit 1

@@ -3,7 +3,7 @@ PACKAGE=uschedule
 CLASS=admin
 
 
-CC=gcc
+CC=cc
 L=./auto-link.sh
 C=./auto-compile.sh
 W=./auto-compilew.sh
@@ -38,7 +38,7 @@ PREMAKE_TARGETS = uscheduled uschedulerm uschedulelist uschedulecmd \
 uschedulecp uscheduleedit uschedule uscheduleruntimelimit \
 uscheduleconf uschedule.1 uschedule_intro.7 uschedulecmd.1 \
 uscheduleconf.1 uschedulecp.1 uscheduled.8 uscheduleedit.1 \
-uschedulelist.1 uschedulerm.1 uscheduleruntimelimit.1
+uschedulelist.1 uschedulerm.1 uscheduleruntimelimit.1 uscheduleconf-runit
  
 PREMAKE_CLEANFILES = check.out t.* conftest* auto-version.tmac \
 install.html.t uschedule.html.t intro.html.t uschedulecmd.html.t \
@@ -104,6 +104,8 @@ uscheduleruntimelimit:  uscheduleruntimelimit.o libunix.a libtai.a libbyte.a aut
 	$L uscheduleruntimelimit  uscheduleruntimelimit.o libunix.a libtai.a libbyte.a 
 uscheduleconf:  uscheduleconf.o  libuomisc.a libunix.a libtai.a libbyte.a auto-link.sh
 	$L uscheduleconf  uscheduleconf.o  libuomisc.a libunix.a libtai.a libbyte.a 
+uscheduleconf-runit:  uscheduleconf-runit.o  libuomisc.a libunix.a libtai.a libbyte.a auto-link.sh
+	$L uscheduleconf-runit  uscheduleconf-runit.o  libuomisc.a libunix.a libtai.a libbyte.a 
 auto-typesize.h: auto-typesize.stamp
 auto-typesize.stamp: typesize.sh auto-compile.sh auto-link.sh
 	sh typesize.sh >typesize.t
@@ -467,6 +469,10 @@ uscheduleconf.o: uscheduleconf.c svscan_conf.h buffer.h bailout.h \
  str.h env.h scheduled.h typesize.h auto-typesize.h taia.h tai.h \
  uint64.h stralloc.h gen_alloc.h attributes.h uogetopt.h auto-compilew.sh
 	$W  -c uscheduleconf.c
+uscheduleconf-runit.o: uscheduleconf-runit.c svscan_conf.h buffer.h bailout.h \
+ str.h env.h scheduled.h typesize.h auto-typesize.h taia.h tai.h \
+ uint64.h stralloc.h gen_alloc.h attributes.h uogetopt.h auto-compilew.sh
+	$W  -c uscheduleconf-runit.c
 uschedulecp.o: uschedulecp.c uogetopt.h scheduled.h typesize.h \
  auto-typesize.h taia.h tai.h uint64.h stralloc.h gen_alloc.h \
  attributes.h open.h bailout.h buffer.h error.h auto-compilew.sh
